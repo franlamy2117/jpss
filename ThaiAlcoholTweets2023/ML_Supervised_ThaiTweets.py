@@ -2,7 +2,7 @@ import re, datetime
 import dill
 from pathlib import Path
 import pandas as pd
-from vrac.remove_emoji import remove_emoji
+from remove_emoji import remove_emoji
 from pythainlp.tokenize import word_tokenize as custom_tokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import classification_report
