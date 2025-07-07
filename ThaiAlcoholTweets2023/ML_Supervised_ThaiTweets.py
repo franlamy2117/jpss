@@ -14,10 +14,10 @@ from sklearn.neighbors import KNeighborsClassifier
 from HeatmapThaiTweets import day_hour_heatmap
 from ChiSquare_Heatmaps import chi_square_by_hour
 
-CATEG_TRAINING = Path(r"Training dataset for categoried.csv")
-FULL_DATA = Path(r"Full Dataset.csv")
+CATEG_TRAINING =     Path(r"Training dataset for categoried.csv")
+FULL_DATA =          Path(r"Full Dataset.csv")
 SENTIMENT_TRAINING = Path("Training dataset for sentiment.csv")
-MODEL_DIR = Path("models"); MODEL_DIR.mkdir(exist_ok=True)
+MODEL_DIR =          Path("models"); MODEL_DIR.mkdir(exist_ok=True)
 PREDICT_SUFFIX = "classified"
 
 # Tokenize Thai Tweets
@@ -112,7 +112,7 @@ for name, (pipe, grid) in ML_MODELS.items():
     print(f"=== {name} classification report ===")
     print(classification_report(y_test, y_pred, digits=3))
     result_csv = pd.DataFrame(gs.cv_results_)
-    result_csv.to_csv(rf"D:\CAS tweets\JPSS revision\Final\cross_validation_score_categories_{name}.csv", index=False)
+    result_csv.to_csv(rf"path\cross_validation_score_categories_{name}.csv", index=False)
 
 best_name, best_gs = max(results.items(), key=lambda kv: kv[1].best_score_)
 STAMP = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -159,7 +159,7 @@ if FULL_DATA.exists():
         print(f"=== {name} classification report ===")
         print(classification_report(y_test, y_pred, digits=3))
         result_csv = pd.DataFrame(gs_sent.cv_results_)
-        result_csv.to_csv(rf"D:\CAS tweets\JPSS revision\Final\cross_validation_score_sentiments_{name}.csv",
+        result_csv.to_csv(rf"path\cross_validation_score_sentiments_{name}.csv",
                           index=False)
     best_sentiment_name, best_sentiment_model = max(sentiment_results.items(), key=lambda kv: kv[1].best_score_)
     STAMP = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -169,21 +169,19 @@ if FULL_DATA.exists():
     df['sentiment'] = best_sentiment_model.predict(df['text'].astype(str))
 
     # Create DataFrame for PC only and for tweets labelled as Negative and Positive
-    pc_all = df.copy()
-    pc_all.to_csv(r'D:\CAS tweets\JPSS revision\Final\AllPC.csv', encoding='utf-8-sig')
+    pc_net = df[df['sentiment'] == 'NT']
+    pc_net.to_csv(r'path\Neutral_sentiments.csv', encoding='utf-8-sig')
     pc_pos = df[df['sentiment'] == 'P']
-    pc_pos.to_csv(r'D:\CAS tweets\JPSS revision\Final\Positive_sentiments.csv', encoding='utf-8-sig')
+    pc_pos.to_csv(r'path\Positive_sentiments.csv', encoding='utf-8-sig')
     pc_neg = df[df['sentiment'] == 'NG']
-    pc_neg.to_csv(r'D:\CAS tweets\JPSS revision\Final\Negative_sentiments.csv', encoding='utf-8-sig')
+    pc_neg.to_csv(r'path\Negative_sentiments.csv', encoding='utf-8-sig')
 
     # Temporal Heatmaps
-    day_hour_heatmap(pc_all, "All PC Tweets")
+    day_hour_heatmap(pc_net, "Neutral PC Tweets")
     day_hour_heatmap(pc_pos, "Positive PC Tweets")
     day_hour_heatmap(pc_neg, "Negative PC Tweets")
 
     # Chi-square and Cramer's V calculation
-    chi_square_by_hour(pc_all, pc_pos)
-    chi_square_by_hour(pc_all, pc_neg)
-    chi_square_by_hour(pc_pos, pc_neg)
+    chi_square_by_hour(pc_net, pc_pos, pc_neg)
 else:
     print("Unseen data or classification result not found.")
